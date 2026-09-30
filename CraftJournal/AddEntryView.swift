@@ -1,6 +1,7 @@
 import SwiftUI
 import CoreData
 import UIKit
+import PhotosUI
 
 struct AddEntryView: View {
 
@@ -10,9 +11,12 @@ struct AddEntryView: View {
     @State private var title = ""
     @State private var craftType = crafts[0]
     @State private var notes = ""
+    @State private var location = ""
+    
 
     @State private var image: UIImage?
     @State private var showingCamera = false
+    @State private var selectedPhoto: PhotosPickerItem?
 
     var body: some View {
 
@@ -23,6 +27,8 @@ struct AddEntryView: View {
                 TextField("Title", text: $title)
 
                 TextField("Notes", text: $notes, axis: .vertical)
+                TextField("Location", text: $location)
+                
 
                 Picker("Craft", selection: $craftType) {
                     ForEach(crafts, id: \.self) { craft in
@@ -31,6 +37,7 @@ struct AddEntryView: View {
                 }
 
                 Section("Photo") {
+
                     if let image {
                         Image(uiImage: image)
                             .resizable()
@@ -42,13 +49,30 @@ struct AddEntryView: View {
                         showingCamera = true
                     }
                     .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
+
+                    PhotosPicker(
+                        "Choose From Library",
+                        selection: $selectedPhoto,
+                        matching: .images
+                    )
                 }
             }
             .navigationTitle("New Entry")
+
             .fullScreenCover(isPresented: $showingCamera) {
                 CameraView(image: $image)
                     .ignoresSafeArea()
             }
+
+            .onChange(of: selectedPhoto) { _, newItem in
+                Task {
+                    if let data = try? await newItem?.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        image = uiImage
+                    }
+                }
+            }
+
             .toolbar {
 
                 ToolbarItem(placement: .cancellationAction) {
@@ -76,7 +100,7 @@ struct AddEntryView: View {
         entry.craftType = craftType
         entry.date = Date()
         entry.notes = notes
-
+        entry.location = location
         entry.photo = image?.jpegData(compressionQuality: 0.7)
 
         do {

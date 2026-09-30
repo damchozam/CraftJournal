@@ -6,6 +6,8 @@ struct EntryDetailView: View {
 
     @ObservedObject var entry: CraftEntry
 
+    @State private var showingEditView = false
+
     var body: some View {
 
         ScrollView {
@@ -30,6 +32,12 @@ struct EntryDetailView: View {
                     .font(.title3)
                     .foregroundStyle(.secondary)
 
+                if let location = entry.location,
+                   !location.isEmpty {
+
+                    Label(location, systemImage: "location")
+                }
+
                 if let date = entry.date {
                     Text(date, style: .date)
                 }
@@ -40,5 +48,18 @@ struct EntryDetailView: View {
             .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+
+            ToolbarItem(placement: .topBarTrailing) {
+
+                Button("Edit") {
+                    showingEditView = true
+                }
+            }
+        }
+        .sheet(isPresented: $showingEditView) {
+
+            EditEntryView(entry: entry)
+        }
     }
 }
