@@ -1,13 +1,26 @@
 import SwiftUI
 import CoreData
-
+import UIKit
 
 struct EntryDetailView: View {
+
     @ObservedObject var entry: CraftEntry
 
     var body: some View {
+
         ScrollView {
+
             VStack(alignment: .leading, spacing: 12) {
+
+                if let photoData = entry.photo,
+                   let image = UIImage(data: photoData) {
+
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .cornerRadius(12)
+                }
 
                 Text(entry.title ?? "Untitled")
                     .font(.largeTitle)
@@ -20,6 +33,7 @@ struct EntryDetailView: View {
                 if let date = entry.date {
                     Text(date, style: .date)
                 }
+
                 Text(entry.notes ?? "")
             }
             .frame(maxWidth: .infinity, alignment: .leading)

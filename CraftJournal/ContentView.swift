@@ -1,5 +1,7 @@
 import SwiftUI
 import CoreData
+import UIKit
+
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -52,16 +54,33 @@ struct ContentView: View {
 }
 
 struct EntryRow: View {
+
     @ObservedObject var entry: CraftEntry
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(entry.title ?? "Untitled")
-                .font(.headline)
 
-            Text(entry.craftType ?? "")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+        HStack {
+
+            if let photoData = entry.photo,
+               let image = UIImage(data: photoData) {
+
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 60, height: 60)
+                    .clipped()
+                    .cornerRadius(8)
+            }
+
+            VStack(alignment: .leading) {
+
+                Text(entry.title ?? "Untitled")
+                    .font(.headline)
+
+                Text(entry.craftType ?? "")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }
